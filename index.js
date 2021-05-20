@@ -38,10 +38,8 @@
                 optionDom.disabled = true;
             }
             if (citySelcted == city) {
-                console.log('ok')
                 optionDom.selected = true;
             }
-            // optionDom.disabled = true;
             frags.appendChild(optionDom);
         })
 
@@ -60,20 +58,21 @@
      *  
      */
     function selectHandle(e) {
-        // console.log(e.target.value),
-        // console.log(e.target.id);
         const targetId = e.target.id === 'start-city' ? 'end-city' : 'start-city',
             sourceId = e.target.id === 'start-city' ? 'start-city' : 'end-city',
             targetDom = document.getElementById(targetId),
-            sourceDom = document.getElementById(sourceId),
             cityBan = e.target.value;
 
         //todo
-        initCity(cities, targetDom, cityBan);
-        initCity(cities, sourceDom, null, cityBan);
-
+        
+        initCity(cities, targetDom, cityBan, targetDom.value);
     }
 
+    /**
+     * 
+     * @param  data 原始数据信息，符合echarts data的数组
+     * @param  links 节点关系数据
+     */
     function renderMap(data, links) {
         const chartDom = document.getElementsByClassName('box')[0];
         const myChart = echarts.init(chartDom);
