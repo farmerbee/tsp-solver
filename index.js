@@ -1,6 +1,3 @@
-// const chartDom = document.getElementsByClassName('box')[0];
-// const myChart = echarts.init(chartDom);
-// let option;
 ; (function () {
     const sourceData = graphGenerator(5, 10),
         data = sourceData.data,
@@ -10,6 +7,7 @@
         });
 
     const startDom = document.getElementById('start-city'),
+        midDom = document.getElementById('mid-city'),
         endDom = document.getElementById('end-city');
 
     init();
@@ -23,6 +21,7 @@
         window.addEventListener('load', renderOption(cities));
         startDom.addEventListener('change', selectHandle.bind(this));
         endDom.addEventListener('change', selectHandle.bind(this));
+        midDom.addEventListener('change', selectHandle.bind(this));
     }
 
     //todo: 重新渲染选项
@@ -55,17 +54,34 @@
 
     /**
      *  任意边选中一座城市时，禁用另一边同样的城市 
+     *  在下方显示选中的城市
      *  
      */
     function selectHandle(e) {
-        const targetId = e.target.id === 'start-city' ? 'end-city' : 'start-city',
-            sourceId = e.target.id === 'start-city' ? 'start-city' : 'end-city',
-            targetDom = document.getElementById(targetId),
+        const sourceId = e.target.id === 'start-city' ? 'start-city' : 'end-city',
+            // targetDom = document.getElementById(targetId),
+            targeIds = filterCity(sourceId),
             cityBan = e.target.value;
 
         //todo
-        
-        initCity(cities, targetDom, cityBan, targetDom.value);
+        targeIds.forEach(id => {
+            const targetDom = document.getElementById(id);
+            initCity(cities, targetDom, cityBan, targetDom.value);
+        })
+        // initCity(cities, targetDom, cityBan, targetDom.value);
+    }
+
+
+    /**
+     *  筛选需要禁用选项卡的名字 
+     * @param {string} domName 选项卡节点名字
+     * @returns 需要禁用的DOM节点的名字
+     */
+    function filterCity(domName) {
+        const nameBuf = ['start-city', 'mid-city', 'end-city'];
+        return nameBuf.filter(name => {
+            return name != domName;
+        })
     }
 
     /**

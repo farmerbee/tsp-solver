@@ -46,9 +46,13 @@
 }
 .select-wrap *{
     margin-left: .5em;
-    /* line-height: 100%; */
+    line-height: 100%;
     /* text-align: center; */
     font-size: 1em;
+}
+
+.select-wrap .notification{
+    font-weight: bolder;
 }
 
 .select-button option{
@@ -61,11 +65,18 @@
     /* background-color: darkseagreen; */
 }
 
-.select-wrap .submit-button{
-    display: block;
+
+.select-wrap .submit-btn{
+    display: inline-block;
+    width: 4em;
+    height: 1.5em;
     margin-left: 2em;
-    border: 1px solid black;
-    border-radius: 1px;
+    border-radius: 5px;
+    /* font-size: .75em; */
+    color:#fff;
+    line-height: 1.5em;
+    text-align: center;
+    background-color: rgb(4, 106, 196);
 }
 
 .box {
