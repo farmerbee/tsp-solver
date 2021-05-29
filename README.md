@@ -1,1 +1,3 @@
-# logistics-allocation
+# 使用不同算法来解决旅行商(TSP）
+#### 模拟退火
+#### 遗传算法
