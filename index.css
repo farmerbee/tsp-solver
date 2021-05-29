@@ -3,90 +3,94 @@
     padding: 0;
 }
 
-.container {
-    position: relative;
+.hd {
     margin: 0 auto;
-    width: 80%;
-    height: 1000px;
+    width: 40%;
+    height: 125px;
+    background-color: whitesmoke;
     /* border: 1px solid black; */
+    border-radius: 20px;
+    box-shadow: 0 0 5px 5px rgb(200, 200, 200);
 }
 
-.hd{
-    position: relative;
-    margin: 10px auto ;
+.hd .left,
+.hd .right{
+    /* width: 49%; */
+    height: 125px;
+    float: left;
+    text-align: center;
+}
+
+.hd .left{
     width: 70%;
-    height: 80px;
-    /* border: black 1px solid; */
-    border-radius: 10px;
-    overflow: hidden;
-    background-color: #eee;
 }
 
-.hd .select-wrap,
-.hd .show-wrap{
-    /* margin: 0 auto; */
-    /* width: 70%; */
-    padding: 5px;
-    width: 100%;
-    height: 90px;
-    /* line-height: 90px; */
-    text-align: center;
-    /* font-size: 1.5em; */
-    /* background-color: #eee; */
-}
-.hd .select-wrap{
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-.hd .show-wrap{
-    position: absolute;
-    top: 100px;
-    left: 0;
-}
-.select-wrap *{
-    margin-left: .5em;
-    line-height: 100%;
-    /* text-align: center; */
-    font-size: 1em;
+.hd .right{
+    width: 30%;
 }
 
-.select-wrap .notification{
-    font-weight: bolder;
+.hd .left *{
+    margin: 2px 5px;
 }
 
-.select-button option{
-    background-color: gainsboro;
+.hd .left .number-wrap{
+    display: none;
 }
 
-.select-wrap .submit-btn:hover{
-    cursor: pointer;
-    font-size: large;
-    /* background-color: darkseagreen; */
+.hd .left .number-wrap.active{
+    display: block;
 }
 
+.hd .left .ga-param-wrap{
+    display: none;
+}
 
-.select-wrap .submit-btn{
-    display: inline-block;
-    width: 4em;
-    height: 1.5em;
-    margin-left: 2em;
+.hd .left .ga-param-wrap.active{
+    display: block;
+}
+.hd .left .anneal-param-wrap{
+    display: none;
+}
+
+.hd .left .anneal-param-wrap.active{
+    display: block;
+}
+.hd .right *{
+    margin: 10px;
+    /* padding: 0 3em; */
+    width: 6em;
+    background-color:#2E9FFF ;
+    color: #fff;
     border-radius: 5px;
-    /* font-size: .75em; */
-    color:#fff;
-    line-height: 1.5em;
-    text-align: center;
-    background-color: rgb(4, 106, 196);
 }
 
-.box {
+.hd .right *:hover{
+    cursor: pointer;
+}
+/* .box { */
+    .marble{
     position: absolute;
-    top: 210px;
-    left: 10%;
+    /* margin: 200px auto; */
+    top: 150px;
+    left: 33%;
     /* margin: 0 auto; */
-    width: 90%;
-    height: 800px;
+    width: 700px;
+    height: 700px;
     /* border: 1px solid black; */
     border-radius: 50px;
     background-color: whitesmoke;
+    box-shadow: 0 0 5px 5px rgb(100, 100, 100);
+}
+
+.box #map-header{
+    position: absolute;
+    top: 5px;
+    left: 75px
+}
+
+
+.box #map{
+    position: absolute;
+    top: 75px;
+    left: 75px;
 }

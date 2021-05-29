@@ -10,30 +10,86 @@
 </head>
 
 <body>
-    <div class="container">
-        <div class="hd">
-            <div class="select-wrap">
-                <span class="notification">请选择目标城市</span>
-                <label class="select-label" for="start-city">起始站</label>
-                <select class="select-button" value="" name="start-city" id="start-city">
+    <div class="hd">
+        <div class="left">
+            <div class="type-wrap">
+                <label for="map">地图</label>
+                <select name="map-type" id="map-type">
+                    <!-- <option value="" selected disabled></option> -->
+                    <option class="auto-option" value="automap" selected>自动生成</option>
+                    <option value="dantzig">dantzig42</option>
                 </select>
-                <label class="select-label" for="mid-city">中途城市</label>
-                <select class="select-button" value="" name="mid-city" id="mid-city">
-                </select>
-                <label class="select-label" for="end-city">终点站</label>
-                <select class="select-button" value="" name="end-city" id="end-city">
-                </select>
-                <a class="submit-btn">确定</a>
             </div>
-            <div class="show-wrap">xx</div>
+            <div class="number-wrap active">
+                <label for="node-number">节点数量</label>
+                <select name="node-number" id="node-number" class="node-number">
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <!-- 不同算法的影响算子不同，此处尽列出两项作为展示 -->
+            <div class="algorithm-wrap">
+                <label for="algorithm">算法</label>
+                <select name="algorithm" id="algorithm">
+                    <option value="anneal" selected>模拟退火</option>
+                    <option value="ga">遗传算法</option>
+                </select>
+                <div class="anneal-param-wrap active">
+                    <label for="anneal-temperature">温度</label>
+                    <select name="anneal-temperature" id="anneal-temperature">
+                        <option value="0.5">0.5</option>
+                        <option value="1" selected>1</option>
+                        <option value="10">10</option>
+                        <option value="100">100</option>
+                    </select>
+
+                    <label for="anneal-times">迭代次数</label>
+                    <select name="anneal-times" id="aneal-times">
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200" selected>200</option>
+                        <option value="1000">1000</option>
+                    </select>
+                </div>
+                <div class="ga-param-wrap ">
+                    <label for="ga-scale">种群数量</label>
+                    <select name="ga-scale" id="ga-scale">
+                        <option value="1">1倍</option>
+                        <option value="3">3倍</option>
+                        <option value="5">5倍</option>
+                        <option value="10" selected>10倍</option>
+                    </select>
+
+                    <label for="ga-generation">进化次数</label>
+                    <select name="ga-generation" id="ga-generation">
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="1000" selected>1000</option>
+                        <option value="2000">2000</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="box"></div>
+        <div class="right">
+            <div class="solve">求解</div>
+            <div class="animate">模拟演示</div>
+            <div class="analyze">分析</div>
+        </div>
+    </div>
+    <div class="box marble">
+        <canvas id="map-header" width="600" height="80"></canvas>
+        <canvas id="map" width="600" height="600" style="margin: 10px auto;"></canvas>
     </div>
 
 
-    <script src="cities"></script>
-    <script src="echarts.min.js"></script>
-    <script src="utils.js"></script>
+    <script src="tsp.data.js"></script>
+    <script src="draw.js"></script>
+    <script src="solver.js"></script>
+    <!-- <script src="echarts.min.js"></script> -->
+    <!-- <script src="utils.js"></script> -->
     <script src="index.js"></script>
 </body>
 
