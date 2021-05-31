@@ -56,10 +56,9 @@ function drawPaths(sequence, coods, ctx, randColor = false) {
  * @param {number} height 图的高度 
  * @param {boolean} axisNeed 是否需要渲染坐标轴
  */
-function drawChart(sequences, ctx, baseX, baseY, width, height, axisNeed = true, autoColor=false) {
+function drawChart(sequences, ctx, baseX, baseY, width, height, axisNeed = true, autoColor = false) {
     // todo: get colors from parameters
     ctx.save();
-    const colors = ['#33cc33', '#9900cc', '#ff9900', '#ff0033']
     // 坐标轴
     if (axisNeed) {
         ctx.beginPath();
@@ -68,10 +67,22 @@ function drawChart(sequences, ctx, baseX, baseY, width, height, axisNeed = true,
         ctx.moveTo(baseX, baseY);
         // axis x
         ctx.lineTo(baseX + width, baseY);
+        ctx.lineTo(baseX + width - 5, baseY - 5);
+        ctx.lineTo(baseX + width, baseY);
+        ctx.lineTo(baseX + width - 5, baseY + 5);
         ctx.moveTo(baseX, baseY);
         // axis y
         ctx.lineTo(baseX, baseY - height);
+        ctx.lineTo(baseX - 5, baseY - height + 5);
+        ctx.lineTo(baseX, baseY - height);
+        ctx.lineTo(baseX + 5, baseY - height + 5);
         ctx.stroke();
+
+        // ctx.lineTo(baseX + width, baseY);
+        // ctx.moveTo(baseX, baseY);
+        // // axis y
+        // ctx.lineTo(baseX, baseY - height);
+        // ctx.stroke();
     }
 
     // 折线
@@ -79,7 +90,7 @@ function drawChart(sequences, ctx, baseX, baseY, width, height, axisNeed = true,
         let coods = scaleSequence(sequence, baseX, baseY, width, height * 0.75);
         ctx.beginPath();
         // ctx.strokeStyle = colors[i];
-        if(autoColor){
+        if (autoColor) {
             ctx.strokeStyle = hexColor();
         }
         ctx.lineWidth = 3;
@@ -96,7 +107,7 @@ function drawChart(sequences, ctx, baseX, baseY, width, height, axisNeed = true,
 }
 
 /**
- *  根据单一数字序列放缩生成坐标 
+ *  根据单一数字序列放缩生成坐标,主要为画序列图（折线，柱状图等）
  * @param {number[]} sequence 
  * @param {number} baseX 
  * @param {number} baseY 
@@ -107,9 +118,10 @@ function drawChart(sequences, ctx, baseX, baseY, width, height, axisNeed = true,
 function scaleSequence(sequence, baseX, baseY, width, height) {
     if (!sequence)
         return;
-    let xUnit = width / sequence.length,
+    const seqLen = sequence.length;
+    let xUnit = seqLen <= 5 ? width * 0.9 / 5 : width * 0.9 / seqLen,
         yMax = Math.max(...sequence),
-        yScale = (height - 5) / yMax;
+        yScale = (height * 0.8) / yMax;
     let coods = sequence.map((value, index) => {
         let x = baseX + xUnit * index;
         let y = baseY - value * yScale;
@@ -142,13 +154,89 @@ function scaleCoods(coods, width, height) {
     })
 }
 
+
+/**
+ *  画柱状图 
+ * @param {*} sequence 
+ * @param {*} ctx 
+ * @param {*} baseX 
+ * @param {*} baseY 
+ * @param {*} width 
+ * @param {*} height 
+ */
+function drawHistoGram(sequence, ctx, baseX, baseY, width, height, label) {
+    const seqLen = sequence.length;
+    let pace = 0;
+    if (seqLen <= 5) {
+        pace = width * 0.9 / 5;
+    } else {
+        pace = width * 0.9 / seqLen;
+    }
+    let seq = scaleSequence(sequence, baseX, baseY, width, height).map(cood => cood.y);
+    ctx.beginPath();
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.moveTo(baseX, baseY);
+    // axis x
+    ctx.lineTo(baseX + width, baseY);
+    ctx.lineTo(baseX + width - 5, baseY - 5);
+    ctx.lineTo(baseX + width, baseY);
+    ctx.lineTo(baseX + width - 5, baseY + 5);
+    ctx.moveTo(baseX, baseY);
+    // axis y
+    ctx.lineTo(baseX, baseY - height);
+    ctx.lineTo(baseX - 5, baseY - height + 5);
+    ctx.lineTo(baseX, baseY - height);
+    ctx.lineTo(baseX + 5, baseY - height + 5);
+    ctx.stroke();
+    // x, y label
+    if (label) {
+        ctx.save();
+        ctx.font = `${(height + width) / 55}px Droid Sans Mono`;
+        ctx.strokeText(label.xlabel, baseX, baseY - height);
+        ctx.strokeText(label.ylabel, baseX + width - 50, baseY + (height + width) / 55);
+        ctx.restore();
+    }
+    seq.forEach((v, i) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(baseX + pace * i, baseY);
+        ctx.fillStyle = hexColor();
+        ctx.rect(baseX + pace * i, baseY, pace, -(baseY - v));
+        ctx.fill();
+        ctx.restore();
+    })
+}
+
+
+/**
+ *  decorator of @drawHistoGram
+ *  可以画基准线 
+ * @param {number} baseLine 用于对比的基准线高度/值
+ */
+function drawTest(sequence, ctx, baseX, baseY, width, height, label, baseLine) {
+    // 和要画的序列里的值一起放缩
+    const baseCood = scaleSequence([baseLine, ...sequence], baseX, baseY, width, height)[0];
+    drawHistoGram(sequence, ctx, baseX, baseY, width, height, label);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(baseCood.x, baseCood.y);
+    ctx.lineTo(baseX + width, baseCood.y);
+    ctx.stroke();
+    ctx.font = `${(width+height)/60}px Droid Sans Mono`;
+    ctx.strokeText('' + baseLine, baseX - (width+height)/60 * 2, baseCood.y)
+    ctx.restore();
+}
+
 /**
  * 随机产生16进制RGB字符串
  * @returns {string} heximal color string
  */
 function hexColor() {
-    let r = new Number(Math.floor(Math.random() * 255)).toString(16);
-    let g = new Number(Math.floor(Math.random() * 255)).toString(16);
-    let b = new Number(Math.floor(Math.random() * 255)).toString(16);
-    return '#' + r + g + b;
+    // 合法的8位16进制数，至少是17
+    let r = new Number(17 + Math.floor(Math.random() * (255 - 17))).toString(16);
+    let g = new Number(17 + Math.floor(Math.random() * (255 - 17))).toString(16);
+    let b = new Number(17 + Math.floor(Math.random() * (255 - 17))).toString(16);
+    let value = r + g + b;
+    return '#' + value;
 }

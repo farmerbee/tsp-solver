@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>TSP Solver</title>
     <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-    <div class="hd">
+    <div class="hd active">
         <div class="left">
             <div class="type-wrap">
                 <label for="map">地图</label>
@@ -46,7 +46,7 @@
                         <option value="100">100</option>
                     </select>
 
-                    <label for="anneal-times">迭代次数</label>
+                    <label for="anneal-times">降温次数</label>
                     <select name="anneal-times" id="aneal-times">
                         <option value="50">50</option>
                         <option value="100">100</option>
@@ -73,11 +73,25 @@
                 </div>
             </div>
         </div>
-        <div class="right">
+        <div class="right active ">
             <div class="solve">求解</div>
             <div class="animate">模拟演示</div>
-            <div class="analyze">分析</div>
+            <div class="analyze active">分析</div>
         </div>
+        <div class="right-test ">
+            <label for="tet-time">测试次数</label>
+            <select name="test-time" id="test-time">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <div class="test-submit">确定</div>
+        </div>
+
+    </div>
+    <div class="hd-module">
+        <span class="module">快马加鞭中</span>
     </div>
     <div class="box marble">
         <canvas id="map-header" width="600" height="80"></canvas>
@@ -88,8 +102,6 @@
     <script src="tsp.data.js"></script>
     <script src="draw.js"></script>
     <script src="solver.js"></script>
-    <!-- <script src="echarts.min.js"></script> -->
-    <!-- <script src="utils.js"></script> -->
     <script src="index.js"></script>
 </body>
 

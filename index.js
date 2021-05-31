@@ -3,12 +3,18 @@
     const canvasDom = document.getElementById('map'),
         canvasHeader = document.getElementById('map-header'),
         mapDom = document.getElementById('map-type'),
+        hdDom = document.getElementsByClassName('hd')[0],
+        hdModuleDom = document.getElementsByClassName('hd-module')[0],
         numWrapDom = document.getElementsByClassName('number-wrap')[0],
         numDom = document.getElementsByClassName('node-number')[0],
         algoDom = document.getElementById('algorithm'),
         solveDom = document.getElementsByClassName('solve')[0],
         animateDom = document.getElementsByClassName('animate')[0],
         analyzeDom = document.getElementsByClassName('analyze')[0],
+        testDom = document.getElementsByClassName('right-test')[0],
+        rightDom = document.getElementsByClassName('right')[0],
+        testSumitDom = document.getElementsByClassName('test-submit')[0],
+        testTimeDom = document.getElementById('test-time'),
         annealParamDom = document.getElementsByClassName('anneal-param-wrap')[0],
         gaParamDom = document.getElementsByClassName('ga-param-wrap')[0],
         annealTempDom = document.getElementById('anneal-temperature'),
@@ -32,17 +38,25 @@
         animateDom.addEventListener('click', handleAnimate.bind(this));
         analyzeDom.addEventListener('click', handleAnalyze.bind(this));
         algoDom.addEventListener('change', handleAlgoChange.bind(this));
+        testSumitDom.addEventListener('click', handleTest.bind(this));
+    }
+
+    function handleAnalyze() {
+        rightDom.className = 'right';
+        testDom.className = 'right-test active';
     }
 
 
-    function handleAnalyze() {
+    function handleTest() {
+        hdModuleDom.className = 'hd-module active';
+        clearCanvas();
         let result = [],
-            solver = null,
             coods = null,
             distances = null;
         const mapType = mapDom.value,
             algoType = algoDom.value,
-            nodesNumber = numDom.value ? parseInt(numDom.value) : undefined;
+            nodesNumber = numDom.value ? parseInt(numDom.value) : undefined,
+            testTime = parseInt(testTimeDom.value);
         // 每次迭代都使用相同的地图信息
         switch (mapType) {
             case 'automap':
@@ -66,37 +80,54 @@
             generationLimit: parseInt(gaGenerationDom.value)
         }
 
-        let testCounter = 10,
+        let testCounter = testTime,
             toId = null;
-        test();
+        //延迟执行，避免擦除画布时卡顿
+        setTimeout(() => {
+            test();
+        }, 50);
+        let baseLine = 0;
         function test() {
-
             const solver = resolveSolver(algoType, options);
             ctx.clearRect(0, 0, cwid, chgt);
             headerCtx.clearRect(0, 0, 1000, 1000);
             solver.solve();
             result.push(solver.ofvBest);
-            drawOfvChart(result, ctx, 10, cwid - 50, cwid - 100, chgt - 300, '测试次数', true, true);
+            baseLine = mapType == 'automap' ? Math.min(...result) : 699;
+            drawTest(result, ctx, 50, chgt / 3 * 2, cwid - 100, chgt - 300, {
+                xlabel: '近似最短路径',
+                ylabel: '测试次数'
+            }, baseLine)
             testCounter--;
+            const testInfo = `已测试${testTime - testCounter}次，还剩${testCounter}次`;
+            ctx.font = `20px Droid Sans Mono`;
+            ctx.strokeText(testInfo, cwid / 4 * 1, chgt / 3 * 2.4);
             if (testCounter <= 0) {
                 clearTimeout(toId);
                 toId = null;
-                drawOfvChart(result, ctx, 10, cwid - 50, cwid - 100, chgt - 300, '测试次数');
-                console.log('done')
+                hdModuleDom.className = 'hd-module';
+                rightDom.className = 'right active';
+                testDom.className = 'right-test';
+                clearCanvas();
+                drawTest(result, ctx, 50, chgt / 3 * 2, cwid - 100, chgt - 300, {
+                    xlabel: '近似最短路径',
+                    ylabel: '测试次数'
+                }, baseLine);
+                const max = Math.max(...result),
+                    min = Math.min(...result),
+                    avg = parseInt(result.reduce((pre, cur) => pre + cur) / result.length);
+                const testInfo = `共测试${testTime}次，最大值为：${max}，最小值为：${min}，均值为:${avg}`;
+                const aer = parseInt((avg - baseLine) / baseLine * 100);
+                const errorRate = mapType == 'automap' ? '' : `公开最优值为${baseLine},平均错误率为${aer}%`;
+                ctx.font = `20px Droid Sans Mono`;
+                ctx.strokeText(testInfo, 0, chgt / 3 * 2.4);
+                ctx.strokeText(errorRate, 0, chgt / 3 * 2.6);
             } else {
                 toId = setTimeout(() => {
                     test();
                 }, 50);
             }
         }
-        // for (let i = 0; i < 10; i++) {
-        //     const solver = resolveSolver(algoType, options);
-        //     ctx.clearRect(0, 0, cwid, chgt);
-        //     headerCtx.clearRect(0, 0, 1000, 1000);
-        //     solver.solve();
-        //     result.push(solver.ofvBest);
-        //     drawOfvChart(result, ctx, 10, cwid - 50, cwid - 100, chgt - 300, '测试次数');
-        // }
     }
 
 
@@ -129,8 +160,8 @@
     }
 
     function handleSolve() {
-        ctx.clearRect(0, 0, 1000, 1000);
-        headerCtx.clearRect(0, 0, 1000, 1000);
+        hdModuleDom.className = 'hd-module active';
+        clearCanvas();
         const mapType = mapDom.value,
             algoType = algoDom.value;
         switch (mapType) {
@@ -161,8 +192,8 @@
     }
 
     function handleAnimate() {
-        ctx.clearRect(0, 0, 1000, 1000);
-        headerCtx.clearRect(0, 0, 1000, 1000);
+        hdModuleDom.className = 'hd-module active';
+        clearCanvas();
         const mapType = mapDom.value,
             algoType = algoDom.value;
         const xlabel = algoType == 'ga' ? '进化次数' : '温度';
@@ -209,15 +240,27 @@
      * @param {string} chartInfo.xlabel 折线图x坐标显示名 
      */
     function animate(algoType, opt, chartInfo) {
+        let itDuration = 0;
         const animator = resolveSolver(algoType, opt);
         setTimeout(() => {
             animate();
         }, 200);
+        //根据不同算法，设置不同的渲染间隔
+        switch (algoType) {
+            case 'anneal':
+                itDuration = 100;
+                break;
+            case 'ga':
+                itDuration = 50;
+                break;
+            default:
+                itDuration = 100;
+        }
         let toId = null;
         function animate() {
             animator.step();
             ctx.save();
-            ctx.clearRect(0, 0, 1000, 1000);
+            clearCanvas();
             ctx.font = 'lighter 20px consolas';
             ctx.strokeText(`当前最短路径总长为${animator.ofvBest}`, cwid / 4, chgt - 20)
             drawNodes(animator.coods, ctx);
@@ -226,16 +269,18 @@
             if (!animator.done) {
                 toId = setTimeout(() => {
                     animate();
-                }, 50);
+                }, itDuration);
             } else {
-                ctx.clearRect(0, 0, 1000, 1000);
+                clearCanvas();
                 ctx.font = 'lighter 20px consolas';
                 let optimalMessage = chartInfo.optimal ? `,公开最佳路径长度为${chartInfo.optimal}` : '';
                 ctx.strokeText(`近似最短路径总长为${animator.ofvBest}${optimalMessage}`, cwid / 4, chgt - 20)
                 drawNodes(animator.coods, ctx);
                 drawPaths(animator.solutionBest, animator.coods, ctx);
+                drawOfvChart(animator.ofvTrace, headerCtx, 20, 70, 700, 70, chartInfo.xlabel)
                 clearTimeout(toId);
                 toId = null;
+                hdModuleDom.className = 'hd-module';
             }
             ctx.restore();
         }
@@ -252,20 +297,21 @@
     function solve(algoType, opt, optimal) {
         const solver = resolveSolver(algoType, opt);
 
-        ctx.clearRect(0, 0, 1000, 1000);
+        // clearCanvas();
         drawNodes(solver.coods, ctx);
         drawPaths(solver.solutionBest, solver.coods, ctx);
         // wait for initializing the original data
         setTimeout(() => {
             solver.solve();
             ctx.save();
-            ctx.clearRect(0, 0, 1000, 1000);
+            clearCanvas();
             ctx.font = 'lighter 20px consolas';
             let optimalMessage = optimal ? `,公开最佳路径长度为${optimal}` : '';
             ctx.strokeText(`近似最短路径总长为${solver.ofvBest} ${optimalMessage}`, cwid / 4, chgt - 20);
             drawNodes(solver.coods, ctx);
             drawPaths(solver.solutionBest, solver.coods, ctx);
             ctx.restore();
+            hdModuleDom.className = 'hd-module';
         }, 500);
     }
 
@@ -301,7 +347,6 @@
      */
     function drawOfvChart(sequence, ctx, baseX, baseY, width, height, xlabel, axis, autoColor) {
         ctx.save();
-        ctx.clearRect(0, 0, 1000, 1000);
         drawChart([sequence], ctx, baseX, baseY, width, height, axis, autoColor);
         ctx.strokeStyle = 'blue';
         ctx.clientWidth = 1;
@@ -309,6 +354,14 @@
         ctx.strokeText('路径长度', 0, baseY - height + 10);
         ctx.strokeText(xlabel, baseX + width / 4 * 3, baseY);
         ctx.restore();
+    }
+
+    /**
+     * clear canvas
+     */
+    function clearCanvas() {
+        ctx.clearRect(0, 0, cwid, chgt);
+        headerCtx.clearRect(0, 0, canvasHeader.width, canvasHeader.height);
     }
 
 })()

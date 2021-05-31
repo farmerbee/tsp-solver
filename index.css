@@ -3,18 +3,53 @@
     padding: 0;
 }
 
+.hd-module.active {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 30%;
+    width: 40%;
+    height: 125px;
+    line-height: 125px;
+    text-align: center;
+    border-radius: 20px;
+    background-color: rgba(222, 222, 0, .4);
+}
+
+.hd-module .module{
+    padding: 5px;
+    width: 20%;
+    background-color: red;
+  color: white;
+  height: 100%;
+  border-radius: 5px;
+
+  -webkit-animation: 5s linear 0s infinite alternate move_eye;
+          animation: 5s linear 0s infinite alternate move_eye;;
+}
+
+@-webkit-keyframes move_eye { from { margin-left: -80%; } to { margin-left: 80%; }  }
+        @keyframes move_eye { from { margin-left: -80%; } to { margin-left: 80%; }  }
+
+.hd-module {
+    display: none;
+}
 .hd {
+    display: none;
+}
+.hd.active{
+    display: block;
     margin: 0 auto;
     width: 40%;
     height: 125px;
     background-color: whitesmoke;
-    /* border: 1px solid black; */
     border-radius: 20px;
     box-shadow: 0 0 5px 5px rgb(200, 200, 200);
 }
 
 .hd .left,
-.hd .right{
+.hd .right,
+.hd .hd-test{
     /* width: 49%; */
     height: 125px;
     float: left;
@@ -25,7 +60,8 @@
     width: 70%;
 }
 
-.hd .right{
+.hd .right,
+.hd .right-test{
     width: 30%;
 }
 
@@ -55,18 +91,68 @@
 .hd .left .anneal-param-wrap.active{
     display: block;
 }
-.hd .right *{
+
+.hd .right,
+.hd .right-test{
+    display: none;
+    overflow: hidden;
+}
+
+.hd .right.active,
+.hd .right-test.active{
+    display: block;
+}
+
+/* .hd .right-test.active{
+    display: block;
+} */
+
+
+.hd .right *,
+.hd .right-test * 
+ {
+     display: block;
     margin: 10px;
     /* padding: 0 3em; */
-    width: 6em;
+    width: 80%;
     background-color:#2E9FFF ;
+    text-align: center;
+    text-align-last: center;
     color: #fff;
     border-radius: 5px;
 }
 
-.hd .right *:hover{
+.hd .right-test label{
+    background-color: whitesmoke;
+    color: #000;
+}
+
+.hd .right *:hover,
+.hd .right-test *:hover{
     cursor: pointer;
 }
+
+.hd .right .analyze{
+    display: none;
+}
+
+.hd .right *.active{
+    display: block;
+}
+
+/* .hd .right .test-wrap{
+    display: none;
+    font-size: .75em;
+}
+
+.right .test-wrap option{
+    width: 3em;
+    font-size: .75em;
+}
+
+.hd .right .test-wrap.active{
+    display: block;
+} */
 /* .box { */
     .marble{
     position: absolute;
