@@ -28,7 +28,7 @@ function drawNodes(coods, ctx, canvas = null, scale = false) {
  * @param {convas-context} ctx 
  * @param {boolean} randColor
  */
-function drawPaths(sequence, coods, ctx, randColor = false) {
+function drawPaths(sequence, coods, ctx, randColor = false, needClose = true) {
     ctx.save();
     ctx.beginPath();
     if (randColor) {
@@ -41,7 +41,8 @@ function drawPaths(sequence, coods, ctx, randColor = false) {
             ctx.lineTo(coods[i].x, coods[i].y);
         }
     })
-    ctx.closePath();
+    if (needClose)
+        ctx.closePath();
     ctx.stroke();
     ctx.restore();
 }
@@ -223,8 +224,8 @@ function drawTest(sequence, ctx, baseX, baseY, width, height, label, baseLine) {
     ctx.moveTo(baseCood.x, baseCood.y);
     ctx.lineTo(baseX + width, baseCood.y);
     ctx.stroke();
-    ctx.font = `${(width+height)/60}px Droid Sans Mono`;
-    ctx.strokeText('' + baseLine, baseX - (width+height)/60 * 2, baseCood.y)
+    ctx.font = `${(width + height) / 60}px Droid Sans Mono`;
+    ctx.strokeText('' + baseLine, baseX - (width + height) / 60 * 2, baseCood.y)
     ctx.restore();
 }
 

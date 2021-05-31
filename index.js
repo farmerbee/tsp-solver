@@ -83,6 +83,11 @@
         let testCounter = testTime,
             toId = null;
         //延迟执行，避免擦除画布时卡顿
+        drawTest([], ctx, 50, chgt / 3 * 2, cwid - 100, chgt - 300, {
+            xlabel: '近似最短路径',
+            ylabel: '测试次数'
+        }, 0)
+
         setTimeout(() => {
             test();
         }, 50);
@@ -130,20 +135,56 @@
         }
     }
 
-
+    /**
+     * 算法切换handler
+     */
     function handleAlgoChange() {
         const type = algoDom.value;
         switch (type) {
             case 'anneal':
                 gaParamDom.className = 'ga-param-wrap';
                 annealParamDom.className = 'anneal-param-wrap active';
+                boundOff();
                 break;
             case 'ga':
                 gaParamDom.className = 'ga-param-wrap active';
                 annealParamDom.className = 'anneal-param-wrap';
+                boundOff();
+                break;
+            case 'backbound':
+                boundOn();
                 break;
             default:
         }
+    }
+
+    function boundOn() {
+        annealParamDom.className = 'anneal-param-wrap';
+        gaParamDom.className = 'ga-param-wrap';
+        numWrapDom.className = 'number-wrap active';
+        mapDom.innerHTML = `
+                    <option class="auto-option" value="automap" selected>自动生成</option>
+                `
+        numDom.innerHTML = `
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="14">14</option>
+                `
+    }
+
+    function boundOff() {
+        numWrapDom.className = 'number-wrap active';
+        mapDom.innerHTML = `
+                    <option class="auto-option" value="automap" >自动生成</option>
+                    <option value="dantzig">dantzig42</option>
+                `
+        numDom.innerHTML = `
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                `
     }
 
 
@@ -196,7 +237,7 @@
         clearCanvas();
         const mapType = mapDom.value,
             algoType = algoDom.value;
-        const xlabel = algoType == 'ga' ? '进化次数' : '温度';
+        const xlabel = algoType == 'ga' ? '进化次数' : (algoType == 'anneal' ? '温度（递减）' : '搜索次数');
         switch (mapType) {
             case 'automap':
                 animate(algoType, {
@@ -264,7 +305,11 @@
             ctx.font = 'lighter 20px consolas';
             ctx.strokeText(`当前最短路径总长为${animator.ofvBest}`, cwid / 4, chgt - 20)
             drawNodes(animator.coods, ctx);
-            drawPaths(animator.solutionBest, animator.coods, ctx, true);
+            algoType == 'backbound'
+                ?
+                drawPaths(animator.backSolution, animator.coods, ctx, true, false)
+                :
+                drawPaths(animator.solutionBest, animator.coods, ctx, true)
             drawOfvChart(animator.ofvTrace, headerCtx, 20, 70, 700, 70, chartInfo.xlabel)
             if (!animator.done) {
                 toId = setTimeout(() => {
@@ -273,8 +318,10 @@
             } else {
                 clearCanvas();
                 ctx.font = 'lighter 20px consolas';
-                let optimalMessage = chartInfo.optimal ? `,公开最佳路径长度为${chartInfo.optimal}` : '';
-                ctx.strokeText(`近似最短路径总长为${animator.ofvBest}${optimalMessage}`, cwid / 4, chgt - 20)
+                let optimalMessage = chartInfo.optimal ? `,公开最佳路径长度为${chartInfo.optimal}` : '',
+                    counterInfo = algoType == 'backbound' ? `,共搜索${animator.counter}个节点` : '',
+                    resultType = algoType == 'backbound' ? '' : '近似';
+                ctx.strokeText(`${resultType}最短路径总长为${animator.ofvBest}${optimalMessage}${counterInfo}`, cwid / 4, chgt - 20)
                 drawNodes(animator.coods, ctx);
                 drawPaths(animator.solutionBest, animator.coods, ctx);
                 drawOfvChart(animator.ofvTrace, headerCtx, 20, 70, 700, 70, chartInfo.xlabel)
@@ -296,8 +343,6 @@
      */
     function solve(algoType, opt, optimal) {
         const solver = resolveSolver(algoType, opt);
-
-        // clearCanvas();
         drawNodes(solver.coods, ctx);
         drawPaths(solver.solutionBest, solver.coods, ctx);
         // wait for initializing the original data
@@ -306,8 +351,10 @@
             ctx.save();
             clearCanvas();
             ctx.font = 'lighter 20px consolas';
-            let optimalMessage = optimal ? `,公开最佳路径长度为${optimal}` : '';
-            ctx.strokeText(`近似最短路径总长为${solver.ofvBest} ${optimalMessage}`, cwid / 4, chgt - 20);
+            let optimalMessage = optimal ? `,公开最佳路径长度为${optimal}` : '',
+                counterInfo = algoType == 'backbound' ? `,共搜索${solver.counter}个节点` : '',
+                resultType = algoType == 'backbound' ? '' : '近似';
+            ctx.strokeText(`${resultType}最短路径总长为${solver.ofvBest} ${optimalMessage}${counterInfo}`, cwid / 4, chgt - 20);
             drawNodes(solver.coods, ctx);
             drawPaths(solver.solutionBest, solver.coods, ctx);
             ctx.restore();
@@ -329,6 +376,9 @@
                 break;
             case 'ga':
                 return new Gene(opt);
+                break;
+            case 'backbound':
+                return new BackBound(opt);
                 break;
             default:
         }
@@ -352,7 +402,7 @@
         ctx.clientWidth = 1;
         ctx.font = `${parseInt((width + height) / 55)}px sans-serif`;
         ctx.strokeText('路径长度', 0, baseY - height + 10);
-        ctx.strokeText(xlabel, baseX + width / 4 * 3, baseY);
+        ctx.strokeText(xlabel, baseX + width / 3 * 2, baseY);
         ctx.restore();
     }
 

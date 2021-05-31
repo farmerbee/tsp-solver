@@ -367,7 +367,118 @@ class Gene {
 }
 
 /**
- *  节点对象 
+ * 分支界定算法求解TSP问题：1.确定上下界 2.回溯。
+ * 由于算法的复杂度阶乘式增长，所以只适合求解少量节点的问题。
+ * 经测试，本次实验限制在10个节点
+ */
+class BackBound {
+    constructor(opt) {
+        opt = opt || {};
+        this.nodesNumber = opt.coods ? opt.coods.length : (opt.nodesNumber ? opt.nodesNumber : 50);
+        this.coods = opt.coods || nodeGenerator(this.nodesNumber, 500, 500);
+        this.distances = opt.distances || initMatrix(this.coods);
+        this.optimalDistance = this._initOptimalDistance(this.distances);
+        this.root = new _Node(0, 0, null, new Array(this.nodesNumber - 1).fill(0).map((_, idx) => idx + 1), []);
+        this.ofvBest = Infinity;
+        //随机初始化序列，主要为渲染用
+        this.solutionBest = initEdge(this.nodesNumber);
+        //用来演示回溯节点的当前路径
+        this.backSolution = this.solutionBest;
+        // 统计节点搜索的数量
+        this.counter = 0;
+        this.stepIndex = 1;
+        this.done = false;
+        this.ofvTrace = [];
+    }
+
+
+    solve(node = this.root) {
+        const childLen = node.children.length,
+            children = node.children;
+        for (let i = 0; i < childLen; i++) {
+            this.counter++;
+            const curIndex = children[i],
+                curNodeValue = node.nodeValue + this.distances[node.index][curIndex],
+                curParent = node,
+                // 父节点中的兄弟节点即为该节点的孩子节点
+                curChildren = [...children.slice(0, i), ...children.slice(i + 1)],
+                prePath = node.path;
+            // 如果当前节点的预估值已经大于了当前最优值，则回溯到兄弟或父节点
+            if (curNodeValue + this.optimalDistance[curIndex] >= this.ofvBest) {
+                this.backSolution = [...prePath, curIndex];
+                continue;
+            }
+            // 如果该节点已经是叶节点，更新最优值，并回溯
+            if (curChildren.length == 0) {
+                const curSeq = [...prePath, curIndex, 0],
+                    curDistance = curNodeValue + this.distances[curIndex][0];
+                if (curDistance < this.ofvBest) {
+                    this.solutionBest = curSeq;
+                    this.ofvBest = curDistance;
+                    this.ofvTrace.push(this.ofvBest);
+                }
+                continue;
+            }
+            const curNode = new _Node(curIndex, curNodeValue, curParent, curChildren, prePath);
+            this.solve(curNode);
+        }
+    }
+
+    /**
+     *  除了第一个外，序列中的每个节点渲染一次 
+     * @returns 
+     */
+    step() {
+        if (this.stepIndex >= this.nodesNumber) {
+            this.done = true;
+            return;
+        }
+        this.counter++;
+        const children = this.root.children,
+            curIndex = children[this.stepIndex - 1],
+            curNodeValue = this.distances[0][this.stepIndex],
+            curParent = this.root,
+            // 父节点中的兄弟节点即为该节点的孩子节点
+            curChildren = [...children.slice(0, this.stepIndex - 1), ...children.slice(this.stepIndex)],
+            prePath = [0, curIndex];
+
+        const curNode = new _Node(curIndex, curNodeValue, curParent, curChildren, prePath);
+        this.solve(curNode);
+        this.stepIndex++;
+    }
+
+    /**
+     *  最短边数组，用来预估边界。
+     * 由于是用来预估边界，所以只含最短路径值
+     * @param {number[][]} distances 
+     */
+    _initOptimalDistance(distances) {
+        return distances.map((d) => {
+            return Math.min(...d);
+        })
+    }
+
+
+}
+
+/**
+ *  分支界定算法节点对象 
+ * @param {number} index 节点在所在的索引值
+ * @param {number} nodeValue 当前节点路径长度 
+ * @param {_Node} parent 父节点 
+ * @param {number[]} children  孩子节点序列
+ * @param {number[]} path 当前路径 
+ */
+function _Node(index, nodeValue, parent, children, path) {
+    this.index = index;
+    this.nodeValue = nodeValue;
+    this.parent = parent;
+    this.children = children;
+    this.path = [...path, index];
+}
+
+/**
+ *  节点坐标对象 
  * @param {number} x x axis position
  * @param {number} y y axis position
  */
